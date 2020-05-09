@@ -1,8 +1,9 @@
 import pygame
 import math
+import ParticleSystem
 
 class Player(object):
-    def __init__(self, x, y):
+    def __init__(self, x, y, part_sys):
         self.x = x
         self.y = y
         self.width = 25
@@ -15,6 +16,7 @@ class Player(object):
         self.on_ground = True
         self.velX = 0
         self.velY = 0
+        self.part_sys = part_sys
 
     def inverse(self):
         self.gravity = -self.gravity
@@ -56,11 +58,17 @@ class Player(object):
             self.y += self.velY
             self.on_ground = False
         else:
-            while not(self.is_colliding(blocks, self.x, self.y + math.copysign(1, self.velY))):
+            sign = math.copysign(1, self.velY)
+            while not(self.is_colliding(blocks, self.x, self.y + sign)):
                 self.y += math.copysign(1, self.velY)
 
             self.velY = 0
-            self.on_ground = True
+
+            if (sign == math.copysign(1, self.gravity)) and not(self.on_ground):
+                self.on_ground = True
+
+                if self.y < 300 and self.y > 249:
+                    self.part_sys.create_ripple(self.x + 12)
 
     def is_colliding(self, blocks, x, y):
         for block in blocks:
