@@ -20,6 +20,17 @@ class Player(object):
         self.part_sys = part_sys
         self.border = 0
 
+    def reset(self, window_width, window_height):
+        self.x = window_width / 2 - 12
+
+        if self.gravity > 0:
+            self.y = -50
+        else:
+            self.y = window_height
+
+        self.velX = 0
+        self.velY = 0
+
     def inverse(self):
         self.gravity = -self.gravity
         self.jump_speed = -self.jump_speed
