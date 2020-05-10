@@ -18,6 +18,7 @@ class Player(object):
         self.velX = 0
         self.velY = 0
         self.part_sys = part_sys
+        self.border = 0
 
     def inverse(self):
         self.gravity = -self.gravity
@@ -88,6 +89,3 @@ class Player(object):
                 return block
 
         return None
-
-    def draw(self, window, color):
-        pygame.draw.rect(window, color, (round(self.x), round(self.y), self.width, self.height))

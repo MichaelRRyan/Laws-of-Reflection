@@ -1,4 +1,5 @@
 import pygame
+import Camera
 
 class ParticleSystem(object):
     def __init__(self):
@@ -11,9 +12,9 @@ class ParticleSystem(object):
             if not(particle.alive):
                 self.particles.pop(self.particles.index(particle))
 
-    def draw(self, window):
+    def draw(self, Camera):
         for particle in self.particles:
-            particle.draw(window)
+            Camera.draw_circle((50, 0, 50), particle)
 
     def create_ripple(self, x):
         self.particles.append(RippleParticle(x))
@@ -21,8 +22,10 @@ class ParticleSystem(object):
 class RippleParticle(object):
     def __init__(self, x):
         self.x = x
+        self.y = 300
         self.radius = 10
         self.alive = True
+        self.border = 1
 
     def update(self):
         self.radius += 1
