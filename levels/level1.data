@@ -1,0 +1,18 @@
+# Level width
+w 500
+
+# Goal positions
+tg 1200 50
+bg 1200 50
+
+# Floor and borders
+t 0 0 800 300
+t 0 300 0 300
+t 800 500 0 500
+
+b 0 0 800 300
+b 0 300 0 300
+b 800 500 0 500
+
+# Platforms
+t 500 40 20 20

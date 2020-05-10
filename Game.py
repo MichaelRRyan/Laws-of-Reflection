@@ -2,6 +2,7 @@ import pygame
 import Player
 import Block
 import ParticleSystem
+import Collision
 
 class Game(object):
     def __init__(self):
@@ -20,13 +21,14 @@ class Game(object):
         self.viewX = 0
         self.immovable_num = 3
         self.level_width = 0
-        self.top_goal = (0, 0)
-        self.bottom_goal = (0, 0)
+        self.top_goal = GoalObject(0, 0, 25, 50)
+        self.bottom_goal = GoalObject(0, 0, 25, 50)
+        self.level_num = 0
 
         pygame.display.set_caption("Mirror")
         self.bottom_player.inverse()
 
-        self.read_in_blocks("level0.txt")
+        self.next_level()
 
     def run(self):
         while self.running:
@@ -49,6 +51,7 @@ class Game(object):
         self.bottom_player.update(pressed_keys, self.bottom_blocks)
         self.part_sys.update()
 
+        self.check_for_level_complete()
         self.move_camera()
 
     def draw(self):
@@ -67,16 +70,21 @@ class Game(object):
         self.bottom_player.draw(self.window, self.bottom_color)
 
         # Draw the goals
-        pygame.draw.rect(self.window, self.top_color, (self.top_goal[0], self.top_goal[1], 26, 50), 2)
-        pygame.draw.rect(self.window, self.bottom_color, (self.bottom_goal[0], self.bottom_goal[1], 26, 50), 2)
+        self.top_goal.draw(self.window, self.top_color)
+        self.bottom_goal.draw(self.window, self.bottom_color)
 
         pygame.display.update()
 
-    def read_in_blocks(self, file_name):
+    def load_level(self, level_num):
         self.top_blocks.clear()
         self.bottom_blocks.clear()
+        self.top_player.x = self.window_width // 2- 12
+        self.top_player.y = -50
+        self.bottom_player.x = self.window_width // 2 - 12
+        self.bottom_player.y = self.window_height
+        self.viewX = 0
 
-        file = open("levels/" + file_name, "r")
+        file = open("levels/level" + str(level_num) + ".data", "r")
 
         for line in file:
             items = line.split()
@@ -90,9 +98,11 @@ class Game(object):
 
             if len(items) == 3:
                 if items[0] == "tg":
-                    self.top_goal = (int(items[1]), self.window_height // 2 - int(items[2]))
+                    self.top_goal.x = int(items[1])
+                    self.top_goal.y = self.window_height // 2 - int(items[2])
                 elif items[0] == "bg":
-                    self.bottom_goal = (int(items[1]), self.window_height // 2 + int(items[2]) - 50)
+                    self.bottom_goal.x = int(items[1])
+                    self.bottom_goal.y = self.window_height // 2 + int(items[2]) - self.bottom_goal.height
                 continue
 
 
@@ -134,9 +144,29 @@ class Game(object):
         for i in range(self.immovable_num, len(self.bottom_blocks)):
             self.bottom_blocks[i].set_offset(-self.viewX)
 
-        self.top_goal = ( self.top_goal[0] - int(view_movement), self.top_goal[1])
-        self.bottom_goal = ( self.bottom_goal[0] - int(view_movement), self.bottom_goal[1])
+        self.top_goal.x -= view_movement
+        self.bottom_goal.x -= view_movement
 
+    def check_for_level_complete(self):
+        if Collision.is_colliding(self.top_player, self.top_goal):
+            if Collision.is_colliding(self.bottom_player, self.bottom_goal):
+                self.next_level()
+
+    def next_level(self):
+        self.level_num += 1
+        self.load_level(self.level_num)
+
+class GoalObject(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def draw(self, window, color):
+        pygame.draw.rect(window, color, (round(self.x), self.y, self.width, self.height), 2)
+
+# Start the game
 pygame.init()
 
 game = Game()

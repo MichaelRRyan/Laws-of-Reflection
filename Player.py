@@ -1,13 +1,14 @@
 import pygame
 import math
 import ParticleSystem
+import Collision
 
 class Player(object):
     def __init__(self, x, y, part_sys):
         self.x = x
         self.y = y
         self.width = 25
-        self.height = 49
+        self.height = 50
         self.movement_speed = 5
         self.movement_accel = 0.2
         self.friction = 0.9
@@ -46,21 +47,32 @@ class Player(object):
         self.handle_collisions(blocks)
 
     def handle_collisions(self, blocks):
-        if not(self.is_colliding(blocks, self.x + self.velX, self.y)):
+        # Horizontal Collisions
+        collider = self.is_colliding(blocks, self.x + self.velX, self.y)#
+
+        if collider == None:
             self.x += self.velX
         else:
-            while not(self.is_colliding(blocks, self.x + math.copysign(1, self.velX), self.y)):
-                self.x += math.copysign(1, self.velX)
+            if math.copysign(1, self.velX) > 0:
+                self.x = collider.x - self.width
+            else:
+                self.x = collider.x + collider.width
 
             self.velX = 0
 
-        if not(self.is_colliding(blocks, self.x, self.y + self.velY)):
+        # Vertical Collisions
+        collider = self.is_colliding(blocks, self.x, self.y + self.velY)
+
+        if collider == None:
             self.y += self.velY
             self.on_ground = False
         else:
             sign = math.copysign(1, self.velY)
-            while not(self.is_colliding(blocks, self.x, self.y + sign)):
-                self.y += math.copysign(1, self.velY)
+
+            if sign > 0:
+                self.y = collider.y - self.height
+            else:
+                self.y = collider.y + collider.height
 
             self.velY = 0
 
@@ -72,17 +84,10 @@ class Player(object):
 
     def is_colliding(self, blocks, x, y):
         for block in blocks:
-            if is_colliding(self, block, x, y):
-                return True
+            if Collision.is_colliding_at(self, block, x, y):
+                return block
 
-        return False
+        return None
 
     def draw(self, window, color):
         pygame.draw.rect(window, color, (round(self.x), round(self.y), self.width, self.height))
-
-def is_colliding(object1, object2, x, y):
-    if x + object1.width > object2.x and x < object2.x + object2.width:
-        if y + object1.height > object2.y and y < object2.y + object2.height:
-            return True
-
-    return False
