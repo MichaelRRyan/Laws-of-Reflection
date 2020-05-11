@@ -8,6 +8,14 @@ class Level(object):
         self.top_blocks = []
         self.bottom_blocks = []
 
+        self.top_blocks.append(GameObject.GameObject(0, 300, 800, 300, 0))
+        self.top_blocks.append(GameObject.GameObject(0, -200, 0, 500, 0))
+        self.top_blocks.append(GameObject.GameObject(800, -200, 0, 500, 0))
+
+        self.bottom_blocks.append(GameObject.GameObject(0, 0, 800, 300, 0))
+        self.bottom_blocks.append(GameObject.GameObject(0, 300, 0, 500, 0))
+        self.bottom_blocks.append(GameObject.GameObject(800, 300, 0, 500, 0))
+
 def load_level(level_num):
     file = open("levels/level" + str(level_num) + ".data", "r")
 

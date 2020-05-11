@@ -45,6 +45,16 @@ class Game(object):
         # Get a list of keys as bools (true if pressed)
         pressed_keys = pygame.key.get_pressed()
 
+        #cam_vel = 1
+
+        #if pressed_keys[pygame.K_LSHIFT]:
+        #    cam_vel = 5
+
+        #if pressed_keys[pygame.K_RIGHT]:
+        #    self.camera.view_x += cam_vel
+        #if pressed_keys[pygame.K_LEFT]:
+        #    self.camera.view_x -= cam_vel
+
         # update the players
         self.top_player.update(pressed_keys, self.level.top_blocks)
         self.bottom_player.update(pressed_keys, self.level.bottom_blocks)
@@ -55,11 +65,16 @@ class Game(object):
         # Check if level is complete and update camera
         self.check_for_level_complete()
         self.camera.focus_on(self.top_player.x, self.bottom_player.x, self.window_width, self.level.level_width)
+        self.level = Level.load_level(self.level_num)
+        self.update_stationary()
 
     def draw(self):
-        # Draw the floors
-        self.camera.draw_rect(self.top_color, self.level.top_blocks[0])
-        self.camera.draw_rect(self.bottom_color, self.level.bottom_blocks[0])
+        try:
+            # Draw the floors
+            self.camera.draw_rect(self.top_color, self.level.top_blocks[0])
+            self.camera.draw_rect(self.bottom_color, self.level.bottom_blocks[0])
+        except IndexError as e:
+            print(e)
 
         # Draw the particles
         self.part_sys.draw(self.camera)
@@ -93,6 +108,14 @@ class Game(object):
 
         self.level_num += 1
         self.level = Level.load_level(self.level_num)
+
+    def update_stationary(self):
+        for i in range(0, 2):
+            self.level.top_blocks[i].x = self.camera.view_x
+            self.level.bottom_blocks[i].x = self.camera.view_x
+
+        self.level.top_blocks[2].x = self.camera.view_x + 800
+        self.level.bottom_blocks[2].x = self.camera.view_x + 800
 
 # Start the game
 pygame.init()
