@@ -2,6 +2,7 @@ import pygame
 import math
 import ParticleSystem
 import Collision
+import random
 
 class Player(object):
     def __init__(self, x, y, part_sys):
@@ -50,6 +51,9 @@ class Player(object):
 
         if movement_input == 0:
             self.velX *= self.friction
+        else:
+            self.part_sys.create_dust(self.x + 12, self.y + random.randrange(0, self.height),
+                                      -math.copysign(1, self.gravity), 1)
 
         self.velX = math.copysign(min(abs(self.velX), self.movement_speed), self.velX)
 
@@ -91,8 +95,10 @@ class Player(object):
             if (sign == math.copysign(1, self.gravity)) and not(self.on_ground):
                 self.on_ground = True
 
-                if self.y < 300 and self.y > 249:
+                if collider == blocks[0]:
                     self.part_sys.create_ripple(self.x + 12)
+                else:
+                    self.part_sys.create_dust(self.x + 12, self.y + self.height / 2 + (self.height / 2 * math.copysign(1, self.gravity)), -math.copysign(1, self.gravity), 10)
 
     def is_colliding(self, blocks, x, y):
         for block in blocks:

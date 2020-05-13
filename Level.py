@@ -1,5 +1,6 @@
 import GameObject
 
+
 class Level(object):
     def __init__(self):
         self.level_width = 0
@@ -15,6 +16,7 @@ class Level(object):
         self.bottom_blocks.append(GameObject.GameObject(0, 0, 800, 300, 0))
         self.bottom_blocks.append(GameObject.GameObject(0, 300, 0, 500, 0))
         self.bottom_blocks.append(GameObject.GameObject(800, 300, 0, 500, 0))
+
 
 def load_level(level_num):
     file = open("levels/level" + str(level_num) + ".data", "r")
@@ -40,13 +42,21 @@ def load_level(level_num):
                 level.bottom_goal.y = 300 + int(items[2]) - level.bottom_goal.height
             continue
 
-
         if len(items) == 5:
             if items[0] == "t":
-                level.top_blocks.append(GameObject.GameObject(float(items[1]), 300 - float(items[2]), float(items[3]), float(items[4]), 0))
-            else:
-                level.bottom_blocks.append(GameObject.GameObject(float(items[1]), 300 + float(items[2]) - float(items[4]), float(items[3]), float(items[4]), 0))
+                level.top_blocks.append(GameObject.GameObject(float(items[1]), 300 - float(items[2]), float(items[3]),
+                                                              float(items[4]), 0))
+            elif items[0] == "b":
+                level.bottom_blocks.append(GameObject.GameObject(float(items[1]),
+                                                                 300 + float(items[2]) - float(items[4]),
+                                                                 float(items[3]), float(items[4]), 0))
+            elif items[0] == "tb":
+                level.top_blocks.append(GameObject.GameObject(float(items[1]), 300 - float(items[2]), float(items[3]),
+                                                              float(items[4]), 0))
 
+                level.bottom_blocks.append(
+                    GameObject.GameObject(float(items[1]), 300 + float(items[2]) - float(items[4]), float(items[3]),
+                                          float(items[4]), 0))
     file.close()
 
     return level
