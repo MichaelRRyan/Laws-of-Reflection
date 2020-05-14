@@ -8,6 +8,7 @@ import Level
 import Credits
 import Menu
 import AudioManager
+import Animator
 from enum import Enum
 
 
@@ -38,6 +39,9 @@ class Game(object):
         self.game_state = GameState.MENU
         self.credits = Credits.Credits(self.window_width, self.window_height, self.top_color)
         self.menu = Menu.Menu(self.window_width, self.window_height, self.bottom_color, self.top_color)
+        self.next_state = None
+        self.transitioning = False
+        self.animator = Animator.Animator()
 
         pygame.display.set_caption("Laws of Reflection")
         self.bottom_player.inverse()
@@ -58,17 +62,24 @@ class Game(object):
                 break
 
     def update(self):
-        # Get a list of keys as bools (true if pressed)
-        pressed_keys = pygame.key.get_pressed()
-
-        if self.game_state == GameState.MENU:
-            if self.menu.update(pressed_keys):
-                self.game_state = GameState.GAMEPLAY
-        elif self.game_state == GameState.GAMEPLAY:
-            self.updateGameplay(pressed_keys)
+        if self.animator.animating:
+            if self.animator.update():
+                self.go_to_next_state()
+        elif self.transitioning:
+            self.transitioning = False
         else:
-            if self.credits.update(pressed_keys):
-                self.game_state = GameState.MENU
+            # Get a list of keys as bools (true if pressed)
+            pressed_keys = pygame.key.get_pressed()
+
+            if self.game_state == GameState.MENU:
+                if self.menu.update(pressed_keys):
+                    self.transition_to(GameState.GAMEPLAY)
+                    self.reset()
+            elif self.game_state == GameState.GAMEPLAY:
+                self.updateGameplay(pressed_keys)
+            else:
+                if self.credits.update(pressed_keys):
+                    self.transition_to(GameState.MENU)
 
     def draw(self):
 
@@ -79,12 +90,17 @@ class Game(object):
         else:
             self.credits.draw(self.window)
 
+        self.animator.draw(self.window)
+
         pygame.display.update()
 
     def check_for_level_complete(self):
         if Collision.is_colliding(self.top_player, self.level.top_goal):
             if Collision.is_colliding(self.bottom_player, self.level.bottom_goal):
-                self.next_level()
+                if self.level_num == self.max_level_num - 1:
+                    self.transition_to(GameState.CREDITS)
+                else:
+                    self.transition_to(GameState.GAMEPLAY)
 
     def next_level(self):
         self.top_player.reset(self.window_width, self.window_height)
@@ -93,10 +109,7 @@ class Game(object):
 
         self.level_num += 1
 
-        if self.level_num < self.max_level_num:
-            self.level = Level.load_level(self.level_num)
-        else:
-            self.game_state = GameState.CREDITS
+        self.level = Level.load_level(self.level_num)
 
     def update_stationary(self):
         for i in range(0, 2):
@@ -145,9 +158,21 @@ class Game(object):
     def reset(self):
         self.part_sys.particles.clear()
         self.level = Level.Level()
-        self.top_player.reset()
-        self.bottom_player.reset()
+        self.top_player.reset(self.window_width, self.window_height)
+        self.bottom_player.reset(self.window_width, self.window_height)
         self.level_num = -1
+
+    def transition_to(self, game_state):
+        self.next_state = game_state
+        self.transitioning = True
+        self.animator.animating = True
+
+    def go_to_next_state(self):
+        self.game_state = self.next_state
+
+        if self.game_state == GameState.GAMEPLAY:
+            self.next_level()
+
 
 # Start the game
 pygame.mixer.pre_init(44100, -16, 1, 512)
