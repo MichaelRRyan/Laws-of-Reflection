@@ -7,6 +7,7 @@ import Camera
 import Level
 import Credits
 import Menu
+import AudioManager
 from enum import Enum
 
 
@@ -25,9 +26,10 @@ class Game(object):
         self.top_color = (255, 225, 200)
         self.bottom_color = (50, 0, 50)
         self.clock = pygame.time.Clock()
+        self.audio_manager = AudioManager.AudioManager()
         self.part_sys = ParticleSystem.ParticleSystem(self.top_color, self.bottom_color)
-        self.top_player = Player.Player(self.window_width // 2 - 12, -50, self.part_sys)
-        self.bottom_player = Player.Player(self.window_width // 2 - 12, self.window_height, self.part_sys)
+        self.top_player = Player.Player(self.window_width // 2 - 12, -50, self.part_sys, self.audio_manager)
+        self.bottom_player = Player.Player(self.window_width // 2 - 12, self.window_height, self.part_sys, self.audio_manager)
         self.immovable_num = 3
         self.level_num = -1
         self.max_level_num = 5
@@ -148,6 +150,7 @@ class Game(object):
         self.level_num = -1
 
 # Start the game
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 
 game = Game()

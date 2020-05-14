@@ -1,11 +1,12 @@
 import pygame
 import math
 import ParticleSystem
+import AudioManager
 import Collision
 import random
 
 class Player(object):
-    def __init__(self, x, y, part_sys):
+    def __init__(self, x, y, part_sys, audio_manager):
         self.x = x
         self.y = y
         self.width = 25
@@ -20,6 +21,7 @@ class Player(object):
         self.velY = 0
         self.part_sys = part_sys
         self.border = 0
+        self.audio_manager = audio_manager
 
     def reset(self, window_width, window_height):
         self.x = window_width / 2 - 12
@@ -97,8 +99,10 @@ class Player(object):
 
                 if collider == blocks[0]:
                     self.part_sys.create_ripple(self.x + 12)
+                    self.audio_manager.play_splash()
                 else:
                     self.part_sys.create_dust(self.x + 12, self.y + self.height / 2 + (self.height / 2 * math.copysign(1, self.gravity)), -math.copysign(1, self.gravity), 10)
+                    self.audio_manager.play_thud()
 
     def is_colliding(self, blocks, x, y):
         for block in blocks:
